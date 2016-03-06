@@ -9,8 +9,7 @@ def main ():
   with open(sys.argv[1]) as f: 
     for line in f: 
       A,B = line.split()
-      # print 'SINGLE SHORTEST PATH: ' + single_shortest_path(A,B)
-      print "Paths for " + line + ":"
+      print "Paths for " + line
       set_up(A,B)
 
 
@@ -23,9 +22,12 @@ def set_up(A,B):
   # p[0] = single_shortest_path(double_A,B,0,m)
   # p[m-1] = single_shortest_path(double_A,B,m-1,double_m)
   for r in range(m):
-    p[r] = single_shortest_path(A,B,r,r+m)
+    p[r] = single_shortest_path(double_A,B,r,r+m)
   # find_shortest_paths(double_A,B,p,0,m)
   print p
+  max_subsequence = max(p, key=len)
+  print "The largest subsequence is " + max_subsequence
+  print len(max_subsequence)
   print '\n'
 
 
@@ -61,6 +63,8 @@ def single_shortest_path(A,B,lower_bound,upper_bound):
   # LCS = []
   # print_LCS(direction_table,A,len(A),len(B),LCS)
   LCS = print_LCS_nonrecursively(direction_table,A,x,y)
+  print "LCS for " + A + " and " + B
+  print LCS
   return LCS
 
 
