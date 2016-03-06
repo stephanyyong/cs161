@@ -11,9 +11,6 @@ def main ():
 			A,B = line.split()
 
 			CLCS_slow (A, B)
-			
-		
-
 
 
 def CLCS_slow (A,B):
