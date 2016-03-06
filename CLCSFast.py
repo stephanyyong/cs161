@@ -12,32 +12,33 @@ def main ():
       A,B = line.split()
       # print 'SINGLE SHORTEST PATH: ' + single_shortest_path(A,B)
       set_up(A,B)
-      return
 
 
 def set_up(A,B):
   double_A = A + A
-  m = len(double_A)
+  double_m = len(double_A)
+  m = len(A)
   n = len(B)
-  p = []
-  find_shortest_paths(double_A,B,p,0,m/2)
+  p = ['' for x in range(m)]
+  # p[0] = single_shortest_path(double_A,B,0,m)
+  # p[m-1] = single_shortest_path(double_A,B,m-1,double_m)
+  for r in range(m):
+    p[r] = single_shortest_path(A,B,r,r+m)
+  # find_shortest_paths(double_A,B,p,0,m)
+  print p
 
 
 def find_shortest_paths(A,B,p,l,u):
   if u - l <= 1:
     return
   mid = (u+l)/2
-  print single_shortest_path(A,B,l,u)
+  p[mid] = single_shortest_path(A,B,l,u)
   find_shortest_paths(A,B,p,l,mid)
   find_shortest_paths(A,B,p,mid,u)
 
 
 def single_shortest_path(A,B,lower_bound,upper_bound):
-  # A = 'ABCBDAB' # test string, later change the string to be that bounded by the table
-  # B = 'BDCABA' # test string
-
   A = A[lower_bound:upper_bound] # should have the same length as original A
-
   m = len(A) + 1
   n = len(B) + 1
 
@@ -56,9 +57,6 @@ def single_shortest_path(A,B,lower_bound,upper_bound):
       else:
         length_table[x,y] = length_table[x,y-1]
         direction_table[x,y] = '<'
-
-  print direction_table
-  print length_table
   LCS = []
   print_LCS(direction_table,A,len(A),len(B),LCS)
   return ''.join(LCS)
