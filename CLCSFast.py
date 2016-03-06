@@ -10,7 +10,8 @@ def main ():
     for line in f: 
       print line
       A,B = line.split()
-      single_shortest_path(A,B)
+      # print 'SINGLE SHORTEST PATH: ' + single_shortest_path(A,B)
+      set_up(A,B)
       return
 
 
@@ -19,20 +20,23 @@ def set_up(A,B):
   m = len(double_A)
   n = len(B)
   p = []
+  find_shortest_paths(double_A,B,p,0,m/2)
 
 
 def find_shortest_paths(A,B,p,l,u):
   if u - l <= 1:
     return
   mid = (u+l)/2
-  p[mid] = single_shortest_path(A,B,mid,p[l],p[u])
+  print single_shortest_path(A,B,l,u)
   find_shortest_paths(A,B,p,l,mid)
   find_shortest_paths(A,B,p,mid,u)
 
 
-def single_shortest_path(A,B):
-  A = 'ABCBDAB' # test string, later change the string to be that bounded by the table
-  B = 'BDCABA' # test string
+def single_shortest_path(A,B,lower_bound,upper_bound):
+  # A = 'ABCBDAB' # test string, later change the string to be that bounded by the table
+  # B = 'BDCABA' # test string
+
+  A = A[lower_bound:upper_bound] # should have the same length as original A
 
   m = len(A) + 1
   n = len(B) + 1
@@ -55,24 +59,21 @@ def single_shortest_path(A,B):
 
   print direction_table
   print length_table
-  print_LCS(direction_table,A,len(A),len(B))
-
-  # create something that represents the path?
-  # allocate storage for the paths p_i
-  # compute p_0 using the whole table
-  return
+  LCS = []
+  print_LCS(direction_table,A,len(A),len(B),LCS)
+  return ''.join(LCS)
 
 
-def print_LCS(direction_table,A,x,y):
+def print_LCS(direction_table,A,x,y,LCS):
   if x == 0 or y == 0:
     return
   if direction_table[x,y] == '\\':
-    print_LCS(direction_table,A,x-1,y-1)
-    print A[x-1]
+    print_LCS(direction_table,A,x-1,y-1,LCS)
+    LCS.append(A[x-1])
   elif direction_table[x,y] == '^':
-    print_LCS(direction_table,A,x-1,y)
+    print_LCS(direction_table,A,x-1,y,LCS)
   else:
-    print_LCS(direction_table,A,x,y-1)
+    print_LCS(direction_table,A,x,y-1,LCS)
 
 
 if __name__ == '__main__':
