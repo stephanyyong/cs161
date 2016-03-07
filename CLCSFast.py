@@ -77,16 +77,19 @@ def single_shortest_path(p,mid,upper_bound,lower_bound):
   direction_table = numpy.chararray((m+1, n+1))
   direction_table[:] = '0'
 
+  # for every row in the direction_table 
+  #   for every column in the direction_table:
+  #     check if the current cell is within the bounds of the lower and upper bound
+  #     if it is, then assign costs as normal
+  #     if it is not because it has exceeded an upper_bound path going right, then go to next row
+  #     if it is not because it has exceeded a lower_bound path going down, then go to next column
+
   x = 0
   y = 0
   while x < m+1:
     while y < n+1:
       if x >= 1 and y >= 1:
-        # print '(' + str(x+mid) + ', ' + str(y) + ')'
-        if (x+mid,y) in p[upper_bound]:
-          print 'upper_bound hit at (' + str(x+mid) + ', ' + str(y) + ')!'
-        if (x+mid,y) in p[lower_bound]:
-          print 'lower_bound hit at (' + str(x+mid) + ', ' + str(y) + ')!'
+        print '(' + str(x+mid) + ', ' + str(y) + ')'
         if A[x-1] == original_B[y-1]:
           length_table[x,y] = length_table[x-1,y-1] + 1
           direction_table[x,y] = '\\'
@@ -96,11 +99,15 @@ def single_shortest_path(p,mid,upper_bound,lower_bound):
         else:
           length_table[x,y] = length_table[x,y-1]
           direction_table[x,y] = '<'
+        # if (x+mid,y) in p[upper_bound]:
+        #   print 'upper_bound hit at (' + str(x+mid) + ', ' + str(y) + ')!'
+        #   break
+        # if (x+mid+1,y) in p[lower_bound]:
+        #   print 'lower_bound hit at (' + str(x+mid) + ', ' + str(y) + ')!'
       y = y + 1
     y = 0
     x = x + 1
 
-  # get path in (column,row) for because it's easier to parse
   p_mid = list(reversed(print_LCS_nonrecursively(direction_table,A,m,n,mid)))
   for value in p_mid:
     preallocated_table[value[0],value[1]] = str(mid+1)
@@ -108,9 +115,9 @@ def single_shortest_path(p,mid,upper_bound,lower_bound):
     direction_table[0,x+1] = original_B[x]
   for y in range(m):
     direction_table[y+1,0] = A[y%m]
-  # print '\n\np_mid[' + str(mid) + ']:'
-  # print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
-  # print p_mid
+  print '\n\np_mid[' + str(mid) + ']:'
+  print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
+  print p_mid
   print '\ndirection_table for ' + A + ' x ' + original_B + ':'
   print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
   print direction_table
