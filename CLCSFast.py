@@ -47,11 +47,12 @@ def preallocate_table(A,B):
 
 
 def find_shortest_paths(p,upper_bound,lower_bound):
-  print 'find_shortest_paths with u: ' + str(upper_bound) + ' and l: ' + str(lower_bound)
+  # print 'find_shortest_paths with upper_bound: ' + str(upper_bound) + ' and l: ' + str(lower_bound)
   if lower_bound - upper_bound <= 1:
     return
   mid = (upper_bound+lower_bound)/2
   p[mid] = single_shortest_path(p,mid,upper_bound,lower_bound)
+  return
   find_shortest_paths(p,mid,lower_bound)
   find_shortest_paths(p,upper_bound,mid)
 
@@ -64,39 +65,52 @@ def single_shortest_path(p,mid,upper_bound,lower_bound):
   global n
   A = double_A[mid:mid+m]
 
+  print '\nCalculating p[' + str(mid) + ']...'
   if (upper_bound >= 0):
-    print 'This is the upper_bound:'
+    print 'This is its upper_bound p[' + str(upper_bound) + ']:'
     print p[upper_bound]
   if (lower_bound >= 0):
-    print 'This is the lower_bound:'
+    print 'This is its lower_bound p[' + str(lower_bound) + ']:'
     print p[lower_bound]
 
   length_table = numpy.zeros(shape=(m+1,n+1))
   direction_table = numpy.chararray((m+1, n+1))
   direction_table[:] = '0'
 
-  for (x,y), value in numpy.ndenumerate(direction_table):
-    if x >= 1 and y >= 1:
-      if A[x-1] == original_B[y-1]:
-        length_table[x,y] = length_table[x-1,y-1] + 1
-        direction_table[x,y] = '\\'
-      elif length_table[x-1,y] >= length_table[x,y-1]:
-        length_table[x,y] = length_table[x-1,y]
-        direction_table[x,y] = '^'
-      else:
-        length_table[x,y] = length_table[x,y-1]
-        direction_table[x,y] = '<'
+  x = 0
+  y = 0
+  while x < m+1:
+    while y < n+1:
+      if x >= 1 and y >= 1:
+        # print '(' + str(x+mid) + ', ' + str(y) + ')'
+        if (x+mid,y) in p[upper_bound]:
+          print 'upper_bound hit at (' + str(x+mid) + ', ' + str(y) + ')!'
+        if (x+mid,y) in p[lower_bound]:
+          print 'lower_bound hit at (' + str(x+mid) + ', ' + str(y) + ')!'
+        if A[x-1] == original_B[y-1]:
+          length_table[x,y] = length_table[x-1,y-1] + 1
+          direction_table[x,y] = '\\'
+        elif length_table[x-1,y] >= length_table[x,y-1]:
+          length_table[x,y] = length_table[x-1,y]
+          direction_table[x,y] = '^'
+        else:
+          length_table[x,y] = length_table[x,y-1]
+          direction_table[x,y] = '<'
+      y = y + 1
+    y = 0
+    x = x + 1
 
-  p_mid = print_LCS_nonrecursively(direction_table,A,m,n,mid)
+  # get path in (column,row) for because it's easier to parse
+  p_mid = list(reversed(print_LCS_nonrecursively(direction_table,A,m,n,mid)))
   for value in p_mid:
     preallocated_table[value[0],value[1]] = str(mid+1)
   for x in range(n):
     direction_table[0,x+1] = original_B[x]
   for y in range(m):
     direction_table[y+1,0] = A[y%m]
-  print '\n\np_mid[' + str(mid) + ']:'
-  print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
-  print p_mid
+  # print '\n\np_mid[' + str(mid) + ']:'
+  # print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
+  # print p_mid
   print '\ndirection_table for ' + A + ' x ' + original_B + ':'
   print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
   print direction_table
