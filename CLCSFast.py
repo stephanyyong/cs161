@@ -14,7 +14,6 @@ def main ():
   return
 
 def CLCS(A,B):
-  global preallocated_table
   global subsequence_lengths
   global double_A
   global original_B
@@ -25,14 +24,6 @@ def CLCS(A,B):
   double_A = A + A
   double_m = len(double_A)
   original_B = B
-  
-  # initialize the table of paths
-  preallocated_table = numpy.chararray((double_m+1, n+1))
-  preallocated_table[:] = '0'
-  for x in range(n):
-    preallocated_table[0,x+1] = B[x]
-  for y in range(double_m):
-    preallocated_table[y+1,0] = A[y%m]
 
   # initialize the list of paths p_i
   p = [[] for i in range(m)]
@@ -51,7 +42,6 @@ def find_shortest_paths(p, upper_bound, lower_bound):
   find_shortest_paths(p, upper_bound,mid)
 
 def single_shortest_path(p, mid, upper_bound, lower_bound):
-  global preallocated_table
   global double_A
   global original_B
   global m
