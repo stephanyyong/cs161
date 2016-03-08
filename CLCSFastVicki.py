@@ -9,14 +9,12 @@ def main ():
   with open(sys.argv[1]) as f: 
     for line in f: 
       A,B = line.split()
-      #print '\nPaths for ' + A + ' x ' + B
-      #print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
       preallocate_table(A,B)
-      #return
 
 
 def preallocate_table(A,B):
   global preallocated_table
+  global subsequence_lengths
   global double_A
   global original_B
   global m
@@ -37,48 +35,37 @@ def preallocate_table(A,B):
 
   # initialzie the list of paths p_i
   p = [[] for i in range(m)]
-  length_for_p = numpy.zeros(shape=m)
-  p[0] = single_shortest_path(p, length_for_p, 0, -1, -1)
-  p[m-1] = single_shortest_path(p, length_for_p, m-1, -1, -1)
-  find_shortest_paths(p, length_for_p, 0, m-1)
-  '''
-  print '\nHere are all paths:'
-  print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
-  for i in p:
-    print i
+  subsequence_lengths = [0 for i in range(m)]
+  p[0] = single_shortest_path(p, 0, -1, -1)
+  p[m-1] = single_shortest_path(p, m-1, -1, -1)
+  find_shortest_paths(p, 0, m-1)
+  # print '\nHere are all paths:'
+  # print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
+  # for i in p:
+  #   print i
+  # print '\nHere are all subsequence_lengths:'
+  # print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
+  # for i in subsequence_lengths:
+  #   print i
+  print max(subsequence_lengths)
 
-  print "length of paths", 
-  print length_for_p
-  '''
-  print max(length_for_p)
-
-def find_shortest_paths(p, length_for_p, upper_bound, lower_bound):
+def find_shortest_paths(p, upper_bound, lower_bound):
   # print 'find_shortest_paths with upper_bound: ' + str(upper_bound) + ' and l: ' + str(lower_bound)
   if lower_bound - upper_bound <= 1:
     return
   mid = (upper_bound+lower_bound)/2
-  p[mid] = single_shortest_path(p, length_for_p, mid, upper_bound, lower_bound)
-  #return
-  find_shortest_paths(p, length_for_p, mid, lower_bound)
-  find_shortest_paths(p, length_for_p, upper_bound,mid)
+  p[mid] = single_shortest_path(p, mid, upper_bound, lower_bound)
+  find_shortest_paths(p, mid, lower_bound)
+  find_shortest_paths(p, upper_bound,mid)
 
 
-def single_shortest_path(p, length_for_p, mid, upper_bound, lower_bound):
+def single_shortest_path(p, mid, upper_bound, lower_bound):
   global preallocated_table
   global double_A
   global original_B
   global m
   global n
   A = double_A[mid:mid+m]
-  '''
-  #print '\nCalculating p[' + str(mid) + ']...'
-  if (upper_bound >= 0):
-    print 'This is its upper_bound p[' + str(upper_bound) + ']:'
-    print p[upper_bound]
-  if (lower_bound >= 0):
-    print 'This is its lower_bound p[' + str(lower_bound) + ']:'
-    print p[lower_bound]
-  '''
   length_table = numpy.zeros(shape=(m+1,n+1))
   direction_table = numpy.chararray((m+1, n+1))
   direction_table[:] = '0'
@@ -117,38 +104,18 @@ def single_shortest_path(p, length_for_p, mid, upper_bound, lower_bound):
           else:
             length_table[x,y] = length_table[x,y-1]
             direction_table[x,y] = '<'
-        # if (x+mid,y) in p[upper_bound]:
-        #   print 'upper_bound hit at (' + str(x+mid) + ', ' + str(y) + ')!'
-        #   break
-        # if (x+mid+1,y) in p[lower_bound]:
-        #   print 'lower_bound hit at (' + str(x+mid) + ', ' + str(y) + ')!'
       y = y + 1
     y = 0
     x = x + 1
-  '''
-  print '\n\nlength_table p_mid[' + str(mid) + ']:'
-  print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
-  print length_table
-  '''
-  p_mid = list(reversed(print_LCS_nonrecursively(length_for_p, direction_table, A, m, n, mid)))
+  p_mid = list(reversed(print_LCS_nonrecursively(direction_table, A, m, n, mid)))
   for value in p_mid:
     preallocated_table[value[0],value[1]] = str(mid+1)
   for x in range(n):
     direction_table[0,x+1] = original_B[x]
   for y in range(m):
     direction_table[y+1,0] = A[y%m]
-  '''
-  print '\n\np_mid[' + str(mid) + ']:'
-  print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
-  print p_mid
-  print '\ndirection_table for ' + A + ' x ' + original_B + ':'
-  print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
-  print direction_table
-  print '\npreallocated_table:'
-  print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
-  print preallocated_table
-  '''
   return p_mid
+
 
 def passed_upper_bound(point, upper_bound):
   if not upper_bound:
@@ -162,6 +129,7 @@ def passed_upper_bound(point, upper_bound):
     return True
   else:
     return False
+
 
 def passed_lower_bound(point, lower_bound):
   if not lower_bound:
@@ -177,27 +145,30 @@ def passed_lower_bound(point, lower_bound):
     return False
 
 
-def print_LCS_nonrecursively(length_for_p, direction_table, A, x, y, mid):
-  length = 0
+def print_LCS_nonrecursively(direction_table, A, x, y, mid):
+  global subsequence_lengths
   path_i = []
+  count = 0
   while x != 0 and y != 0:
     path_i.append((x+mid,y))
     if x == 1:
-      break
+        break
     if direction_table[x,y] == '\\':
-      length = length + 1
+      count = count + 1
       x = x - 1
       y = y - 1
     elif direction_table[x,y] == '^':
       x = x - 1
     else:
       y = y - 1
-  while x == 1 and y > 1:
-    y = y - 1
+  intersection_found = False
+  while x == 1 and y >= 1:
+    if direction_table[x,y] == '\\' and intersection_found == False:
+      count = count + 1
+      intersection_found = True
     path_i.append((x+mid,y))
-    if direction_table[x, y] == '\\':
-      length = length + 1
-  length_for_p[mid] = length
+    y = y - 1
+  subsequence_lengths[mid] = count
   return path_i
 
 
